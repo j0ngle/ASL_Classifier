@@ -1,0 +1,28 @@
+Hyperparameters:
+SAMPLE_SIZE     = 1000
+BATCH_SIZE      = 32
+CODINGS_SIZE    = 128
+LEAKY_SLOPE     = 0.2
+DROPOUT         = 0.4
+SCALE           = 16
+WEIGHT_STD      = 0.02
+WEIGHT_MEAN     = 0
+
+LEARNING_RATE_G = 0.0001 *
+LEARNING_RATE_D = 0.0002 *
+
+
+Notes:
+Training went really well at first. G loss started in the realm of around 6-8 and 
+got all the way down to about 4.3
+
+G started diverging at around Epoch 107, where it steadily climbed all the way back to 8.
+D continued to improved during this time
+
+
+Next Steps:
+Train again (for 300 epochs) with a higher G lr. Hopefully that will allow G to 
+learn more quickly before D gets too good.
+
+
+*Notable hyperparameters

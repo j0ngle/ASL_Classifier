@@ -1,0 +1,26 @@
+Hyperparameters:
+SAMPLE_SIZE     = 1000
+BATCH_SIZE      = 32
+CODINGS_SIZE    = 128
+LEAKY_SLOPE     = 0.2
+DROPOUT         = 0.4
+SCALE           = 16
+WEIGHT_STD      = 0.02
+WEIGHT_MEAN     = 0
+
+LEARNING_RATE_G = 0.0002 *
+LEARNING_RATE_D = 0.0002 *
+
+Changed:
+Increased G lr from 0.0001 to 0.0002, changed checkpoint interval from every epoch to every 50 epochs (space saving measure)
+
+
+Notes:
+Increasing G lr seems to have had little positive impact on early runs and contributed to a much
+more dramatic divergence in later epochs.
+
+
+Next Steps:
+Dramatically lower G? Tweak other parameters and/or the architecture. Move on to PGGAN
+
+*Notable hyperparameters
