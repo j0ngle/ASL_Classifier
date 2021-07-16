@@ -19,3 +19,8 @@ Final results from the best round of testing
 
 More images can be found in various version folders within DCGAN.
 
+# PGGAN.ipynb
+Progressive Growth Generative Adverserial Network (PGCAN) designed to learn to replicate landscape paintings from [this](https://www.kaggle.com/ipythonx/wikiart-gangogh-creating-art-gan) dataset. 
+
+Architecture based on [this](https://fabulousjeong.medium.com/tensorflow2-0-pggan-progressive-growing-of-gans-for-improved-quality-stability-and-variation-67a474b39356) tutorial. Still a work in progress. Once I get it working, I'm hoping to make some changes to it to make it mine
+
