@@ -4,7 +4,8 @@ import tensorflow as tf
 from tensorflow import keras
 from keras.layers import Layer, Add
 from keras import backend
-import networks, helpers
+from networks import *
+from helpers import *
 
 #######################
 #   HYPERPARAMETERS   #
@@ -45,9 +46,9 @@ def train_step(images, generator, discriminator, d_pretrain=5, smooth=False, noi
       fake_output = discriminator(generated_images, training=True)
 
       #Calculate loss
-      gen_loss = networks.generator_loss(fake_output,
+      gen_loss = generator_loss(fake_output,
                                 apply_smoothing=smooth)
-      disc_loss = networks.discriminator_loss(real_output, 
+      disc_loss = discriminator_loss(real_output, 
                                      fake_output, 
                                      apply_smoothing=smooth, 
                                      apply_noise=noise)
@@ -75,7 +76,7 @@ def train_step(images, generator, discriminator, d_pretrain=5, smooth=False, noi
         fake_output = discriminator(generated_images, training=True)
 
         #get D loss
-        disc_loss = networks.discriminator_loss(real_output, 
+        disc_loss = discriminator_loss(real_output, 
                                        fake_output, 
                                        apply_smoothing=smooth, 
                                        apply_noise=False)
@@ -93,7 +94,7 @@ def train_step(images, generator, discriminator, d_pretrain=5, smooth=False, noi
       fake_output = discriminator(generated_images, training=True)
 
       #G loss
-      gen_loss = networks.generator_loss(fake_output,
+      gen_loss = generator_loss(fake_output,
                                 apply_smoothing=smooth)
       
       #Get and apply gradients
@@ -104,23 +105,30 @@ def train_step(images, generator, discriminator, d_pretrain=5, smooth=False, noi
 
 def update_alpha(a, generator, discriminator):
   for layer in generator.layers:
-    if isinstance(layer, networks.WeightedSum):
+    if isinstance(layer, WeightedSum):
       backend.set_value(layer.alpha, a)
   for layer in discriminator.layers:
-    if isinstance(layer, networks.WeightedSum):
+    if isinstance(layer, WeightedSum):
       backend.set_value(layer.alpha, a)
 
 
 
 def train_gan(path, generator, discriminator, epochs=50, plot_step=1):
 
+    checkpoint_dir = '/training_checkpoints'
+    checkpoint_prefix = os.path.join(checkpoint_dir, "ckpt")
+    checkpoint = tf.train.Checkpoint(generator_optimizer=gen_optimizer,
+                                  discriminator_optimizer=disc_optimizer,
+                                  generator=generator,
+                                  discriminator=discriminator)
+
     #Metrics
 
     for depth in range(1, 7):
-        dataset = helpers.prepare_dataset(path, FILTERS[7-depth])
+        dataset = prepare_dataset(path, FILTERS[7-depth])
 
-        generator, generator_stable = networks.fade_G(generator, depth)
-        discriminator, discriminator_stable = networks.fade_D(discriminator, depth)
+        generator, generator_stable = fade_G(generator, depth)
+        discriminator, discriminator_stable = fade_D(discriminator, depth)
 
         #Metrics
         print("Starting depth {}...\n".format(depth))
@@ -160,3 +168,11 @@ def train_gan(path, generator, discriminator, epochs=50, plot_step=1):
             #Generator test images and display if epoch % plot_step == 0
     
 
+if __name__ == "__main__":
+  path = ""
+  dataset = process_batch(path, 4)
+
+  generator = init_generator()
+  discriminator = init_discriminator()
+
+  train_gan(path, generator, discriminator, epochs=50, plot_step=1)
