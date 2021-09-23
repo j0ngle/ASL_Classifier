@@ -115,58 +115,89 @@ def update_alpha(a, generator, discriminator):
 
 def train_gan(path, generator, discriminator, epochs=50, plot_step=1):
 
-    checkpoint_dir = '/training_checkpoints'
-    checkpoint_prefix = os.path.join(checkpoint_dir, "ckpt")
-    checkpoint = tf.train.Checkpoint(generator_optimizer=gen_optimizer,
-                                  discriminator_optimizer=disc_optimizer,
-                                  generator=generator,
-                                  discriminator=discriminator)
+  checkpoint_dir = '/training_checkpoints'
+  checkpoint_prefix = os.path.join(checkpoint_dir, "ckpt")
+  checkpoint = tf.train.Checkpoint(generator_optimizer=gen_optimizer,
+                                discriminator_optimizer=disc_optimizer,
+                                generator=generator,
+                                discriminator=discriminator)
 
-    #Metrics
+  for depth in range(1, 7):
+    dataset = prepare_dataset(path, FILTERS[7-depth])
 
-    for depth in range(1, 7):
-        dataset = prepare_dataset(path, FILTERS[7-depth])
+    generator, generator_stable = fade_G(generator, depth)
+    discriminator, discriminator_stable = fade_D(discriminator, depth)
 
-        generator, generator_stable = fade_G(generator, depth)
-        discriminator, discriminator_stable = fade_D(discriminator, depth)
+    depth_loss_G = np.array([])
+    depth_loss_D = np.array([])
 
-        #Metrics
-        print("Starting depth {}...\n".format(depth))
-        for epoch in range(epochs):
-            print("Starting epoch {}/{}...\n".format(epoch, epochs))
+    print("Starting depth {}...\n".format(depth))
+    for epoch in range(epochs):
+      print("Starting epoch {}/{}...\n".format(epoch, epochs))
 
-            update_alpha(epoch / epochs, generator, discriminator)
+      update_alpha(epoch / epochs, generator, discriminator)
 
-            #Metrics
+      epoch_loss_G = []
+      epoch_loss_D = []
 
-            for batch in dataset:
-                g_loss, d_loss = train_step(batch,
-                                            generator, 
-                                            discriminator, 
-                                            d_pretrain=3)
+      for batch in dataset:
+        g_loss, d_loss = train_step(batch,
+                                    generator, 
+                                    discriminator, 
+                                    d_pretrain=3)
 
-                #More metrics
+        epoch_loss_G.append(g_loss)
+        epoch_loss_D.append(d_loss)
 
-            
-            #Swtich to stablized models
-            print("Stablizing...\n")
-            generator = generator_stable
-            discriminator = discriminator_stable
+      depth_loss_G = np.append(depth_loss_G, np.array([epoch_loss_G]))
+      depth_loss_D = np.append(depth_loss_D, np.array([epoch_loss_D]))
 
-            #Metrics
+      
+      #Swtich to stablized models
+      print("Stablizing...\n")
+      generator = generator_stable
+      discriminator = discriminator_stable
 
-            for batch in dataset:
-                g_loss, d_loss = train_step(batch, 
-                                            generator, 
-                                            discriminator, 
-                                            d_pretrain=3)
+      stable_epoch_loss_G = []
+      stable_epoch_loss_D = []
 
-            #Metrics
+      for batch in dataset:
+        g_loss, d_loss = train_step(batch, 
+                                    generator, 
+                                    discriminator, 
+                                    d_pretrain=3)
 
-            #Print epoch metrics
+        stable_epoch_loss_G.append(g_loss)
+        stable_epoch_loss_D.append(d_loss)
 
-            #Generator test images and display if epoch % plot_step == 0
+      print_statistics(epoch_loss_G, "Generator")
+      print_statistics(epoch_loss_D, "Discriminator")
+      print_statistics(stable_epoch_loss_G, "Stable Generator")
+      print_statistics(stable_epoch_loss_D, "Stable Discriminator")
+
+      if ((epoch + 1) % plot_step == 0) or epoch == 0:
+        noise = tf.random.normal(shape=[BATCH_SIZE, CODINGS_SIZE])
+        generated_images = generator(noise, training=False)
+        plot_multiple_images(generated_images, 8)
+        plt.show()
+
+        noise = tf.random.normal([1, CODINGS_SIZE])
+        image = generator(noise, training=False)
+        show_image(image)
+
+    print_statistics(depth_loss_G, "Depth {}: Generator".format(depth))
+    print_statistics(depth_loss_D, "Depth {}: Discriminator".format(depth))
+
+    #Save Model at n depth
+    #TODO: Print charts in plot_step and at the end of depth
+
+  #Save model
+
     
+
+############
+#   MAIN   #
+############
 
 if __name__ == "__main__":
   path = ""

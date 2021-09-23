@@ -114,3 +114,38 @@ def plot_multiple_images(images, n_cols=None):
         plt.subplot(n_rows, n_cols, index + 1)
         plt.imshow(image_adjusted, cmap='binary')
         plt.axis("off")
+
+def print_statistics(list, title, epoch, epochs):
+    print(title+" loss mean: ", np.mean(list), 
+    "Std: ", np.std(list))
+
+def plot_metrics(title, x_label, y_label, epoch, list1, list1_label, list2=None, list2_label=None):
+    title = title + "epoch{}".format(epoch + 1)
+
+    plt.figure(figsize=(10, 3)) 
+    plt.title(title)
+    plt.plot(list1, label=list1_label)
+    plt.plot(list2, label=list2_label)
+    plt.xlabel(x_label)
+    plt.ylabel(y_label)
+    plt.legend()
+    plt.show()
+    
+
+def plot_losses(G_loss, D_loss, G_loss_total, D_loss_total, G_mean, D_mean, epoch):
+    plt.figure(figsize=(10, 5))
+    plt.title("Generator and Discriminator Loss - EPOCH {}".format(epoch + 1))
+    plt.plot(G_loss, label="Generator")
+    plt.plot(D_loss, label="Discriminator")
+    plt.xlabel("Iterations")
+    plt.ylabel("Loss")
+    plt.legend()
+    ymax = plt.ylim()[1]
+    plt.show()
+
+    plt.figure(figsize=(10, 5))
+    plt.plot(np.arange(len(G_loss_total)), G_loss_total, label='G')
+    plt.plot(np.arange(len(D_loss_total)), D_loss_total, label='D')
+    plt.legend()
+    plt.title("All Time Loss")
+    plt.show()

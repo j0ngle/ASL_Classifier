@@ -9,12 +9,6 @@ from train import FILTERS, LEAKY_SLOPE, CODINGS_SIZE
 from train import scaled_size, cross_entropy
 
 ######################
-#   HYPERPARAMTERS   #
-######################
-
-
-
-######################
 #   CUSTOM CLASSES   #
 ######################
 
