@@ -1,5 +1,8 @@
 import numpy as np
 import os
+
+os.add_dll_directory("C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v11.4/bin")
+
 import tensorflow as tf
 from tensorflow import keras
 from keras.layers import Layer, Add
@@ -11,22 +14,7 @@ from helpers import *
 #   HYPERPARAMETERS   #
 #######################
 
-SAMPLE_SIZE      = 1000
-BATCH_SIZE       = 32
-LEAKY_SLOPE      = 0.2
-DROPOUT          = 0.4
-CODINGS_SIZE     = 128 #Might increase size later
-FILTERS          = [512, 256, 128, 64, 32, 16, 8, 4]
-WEIGHT_STD       = 0.02
-WEIGHT_MEAN      = 0
-LEARNING_RATE_G  = 0.0001
-LEARNING_RATE_D  = 0.0002
-scaled_size      = 4
 
-gen_optimizer = keras.optimizers.Adam(learning_rate=LEARNING_RATE_G, beta_1=.5)
-disc_optimizer = keras.optimizers.Adam(learning_rate=LEARNING_RATE_D, beta_1=0.5)
-#disc_optimizer = keras.optimizers.SGD(learning_rate=LEARNING_RATE_D)
-cross_entropy = keras.losses.BinaryCrossentropy(from_logits=False)
 
 #################
 #   FUNCTIONS   #
@@ -50,8 +38,8 @@ def train_step(images, generator, discriminator, d_pretrain=5, smooth=False, noi
                                 apply_smoothing=smooth)
       disc_loss = discriminator_loss(real_output, 
                                      fake_output, 
-                                     apply_smoothing=smooth, 
-                                     apply_noise=noise)
+                                     apply_smoothing=False, 
+                                     apply_noise=False)
 
     #Get gradients
     gen_gradients = gen_tape.gradient(gen_loss, generator.trainable_variables)
@@ -113,9 +101,9 @@ def update_alpha(a, generator, discriminator):
 
 
 
-def train_gan(path, generator, discriminator, epochs=50, plot_step=1):
+def train_gan(path, generator, discriminator, epochs=50, plot_step=1, ckpt_step=1):
 
-  checkpoint_dir = '/training_checkpoints'
+  checkpoint_dir = './training_checkpoints'
   checkpoint_prefix = os.path.join(checkpoint_dir, "ckpt")
   checkpoint = tf.train.Checkpoint(generator_optimizer=gen_optimizer,
                                 discriminator_optimizer=disc_optimizer,
@@ -123,7 +111,7 @@ def train_gan(path, generator, discriminator, epochs=50, plot_step=1):
                                 discriminator=discriminator)
 
   for depth in range(1, 7):
-    dataset = prepare_dataset(path, FILTERS[7-depth])
+    dataset = prepare_dataset(path, FILTERS[7-depth], BATCH_SIZE, SAMPLE_SIZE)
 
     generator, generator_stable = fade_G(generator, depth)
     discriminator, discriminator_stable = fade_D(discriminator, depth)
@@ -131,9 +119,9 @@ def train_gan(path, generator, discriminator, epochs=50, plot_step=1):
     depth_loss_G = np.array([])
     depth_loss_D = np.array([])
 
-    print("Starting depth {}...\n".format(depth))
+    print("\nStarting depth {}...\n".format(depth))
     for epoch in range(epochs):
-      print("Starting epoch {}/{}...\n".format(epoch, epochs))
+      print("\nStarting epoch {}/{}...\n".format(epoch, epochs))
 
       update_alpha(epoch / epochs, generator, discriminator)
 
@@ -144,7 +132,7 @@ def train_gan(path, generator, discriminator, epochs=50, plot_step=1):
         g_loss, d_loss = train_step(batch,
                                     generator, 
                                     discriminator, 
-                                    d_pretrain=3)
+                                    d_pretrain=0)
 
         epoch_loss_G.append(g_loss)
         epoch_loss_D.append(d_loss)
@@ -178,20 +166,44 @@ def train_gan(path, generator, discriminator, epochs=50, plot_step=1):
       if ((epoch + 1) % plot_step == 0) or epoch == 0:
         noise = tf.random.normal(shape=[BATCH_SIZE, CODINGS_SIZE])
         generated_images = generator(noise, training=False)
-        plot_multiple_images(generated_images, 8)
-        plt.show()
+        plot_multiple_images(generated_images, epoch+1, 'epoch_grids', 8)
+        # plt.show()
 
-        noise = tf.random.normal([1, CODINGS_SIZE])
-        image = generator(noise, training=False)
-        show_image(image)
+        plot_metrics('GD_epoch_loss', "iterations", "loss", epoch,
+                      epoch_loss_G, "Generator", 
+                      epoch_loss_D, "Discriminator")
+
+        plot_metrics('GD_total_depth_loss', "iterations", "loss", epoch,
+                      depth_loss_G, "Generator", 
+                      depth_loss_D, "Discriminator")
+
+        #TODO: Show_single image
+        # noise = tf.random.normal([1, CODINGS_SIZE])
+        # image = generator(noise, training=False)
+        # show_image(image, epoch)
+
+      if (epoch + 1) % ckpt_step == 0:
+        print("Saving checkpoint...\n")
+        checkpoint.save(file_prefix = checkpoint_prefix)
 
     print_statistics(depth_loss_G, "Depth {}: Generator".format(depth))
     print_statistics(depth_loss_D, "Depth {}: Discriminator".format(depth))
 
+    #Save images at n depth
+    noise = tf.random.normal(shape=[BATCH_SIZE, CODINGS_SIZE])
+    generated_images = generator(noise, training=False)
+    plot_multiple_images(generated_images, epoch, "depth_grids", 8)
+    # plt.show()
+
+    # noise = tf.random.normal([1, CODINGS_SIZE])
+    # image = generator(noise, training=False)
+    # show_image(image, epoch)
+
     #Save Model at n depth
-    #TODO: Print charts in plot_step and at the end of depth
+    generator.save_weights("/depth_checkpoints/depth_{}.ckpt".format(depth))
 
   #Save model
+  generator.save_weights("final_model.ckpt")
 
     
 
@@ -200,10 +212,10 @@ def train_gan(path, generator, discriminator, epochs=50, plot_step=1):
 ############
 
 if __name__ == "__main__":
-  path = ""
-  dataset = process_batch(path, 4)
+  PATH = "D:/School/landscape/"
+  # dataset = prepare_dataset(PATH, 4, BATCH_SIZE, SAMPLE_SIZE)
 
   generator = init_generator()
   discriminator = init_discriminator()
 
-  train_gan(path, generator, discriminator, epochs=50, plot_step=1)
+  train_gan(PATH, generator, discriminator, epochs=50, plot_step=5)

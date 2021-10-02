@@ -1,4 +1,3 @@
-from train import BATCH_SIZE, SAMPLE_SIZE
 import numpy as np
 import cv2
 import os
@@ -38,11 +37,14 @@ def process_batch(path, d_size):
 
     for filename in os.listdir(path):
         if filename.endswith('jpg'):
+            if i == 10000:
+                break
+
             if (i % 500 == 0):
                 print("[PREPROCESSING] Processed {} images".format(i))
 
             img = None
-            img = process_image(path, d_size)
+            img = process_image(path + filename, d_size)
 
             processed.append(img)
             i += 1
@@ -94,14 +96,19 @@ def noisy_labels(y, p_flip):
 #   METRICS   #
 ###############
 
-def show_image(image):
+def show_image(image, epoch):
+    print("Showing image")
     #Readjusted pixel values (convert from [-1, 1] to [0, 1]) 
     image_adjusted = (image * 127.5 + 127.5) / 255.
-    plt.imshow(image_adjusted, cmap='binary')
+    # plt.imshow(image_adjusted, cmap='binary')
     plt.axis('off')
-    plt.show()
+    # plt.show()
+
+    print("Saving single image")
+    plt.savefig("image_at_epoch_{:04}.png".format(epoch))
+    print("Image saved\n")
  
-def plot_multiple_images(images, n_cols=None):
+def plot_multiple_images(images, epoch, path, n_cols=None):
     n_cols = n_cols or len(images)
     n_rows = (len(images) - 1) // n_cols + 1
     if images.shape[-1] == 1:
@@ -115,12 +122,21 @@ def plot_multiple_images(images, n_cols=None):
         plt.imshow(image_adjusted, cmap='binary')
         plt.axis("off")
 
-def print_statistics(list, title, epoch, epochs):
+    print("\nSaving images grid")
+    #TODO: Save to folder bc right now it isn't working for some reason
+    filename = "PGGAN/" + path + "/grid_at_epoch_{:04}.png".format(epoch)
+    # dir = os.path.join(filename)
+    plt.savefig(filename)
+    print("Grid saved\n")
+
+    plt.close()
+
+def print_statistics(list, title):
     print(title+" loss mean: ", np.mean(list), 
     "Std: ", np.std(list))
 
 def plot_metrics(title, x_label, y_label, epoch, list1, list1_label, list2=None, list2_label=None):
-    title = title + "epoch{}".format(epoch + 1)
+    # title = title + "_at_epoch_{:04}".format(epoch)
 
     plt.figure(figsize=(10, 3)) 
     plt.title(title)
@@ -129,7 +145,13 @@ def plot_metrics(title, x_label, y_label, epoch, list1, list1_label, list2=None,
     plt.xlabel(x_label)
     plt.ylabel(y_label)
     plt.legend()
-    plt.show()
+    # plt.show()
+
+    #TODO: Save to folder bc right now it isn't working for some reason
+    filename = "PGGAN/metrics/" + title + "_epoch_{:04}.png".format(epoch)
+    # dir = os.path.join("metrics/"+filename)
+    
+    plt.savefig(filename)
     
 
 def plot_losses(G_loss, D_loss, G_loss_total, D_loss_total, G_mean, D_mean, epoch):
@@ -141,11 +163,11 @@ def plot_losses(G_loss, D_loss, G_loss_total, D_loss_total, G_mean, D_mean, epoc
     plt.ylabel("Loss")
     plt.legend()
     ymax = plt.ylim()[1]
-    plt.show()
+    # plt.show()
 
     plt.figure(figsize=(10, 5))
     plt.plot(np.arange(len(G_loss_total)), G_loss_total, label='G')
     plt.plot(np.arange(len(D_loss_total)), D_loss_total, label='D')
     plt.legend()
     plt.title("All Time Loss")
-    plt.show()
+    # plt.show()
