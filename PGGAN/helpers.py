@@ -68,9 +68,9 @@ def prepare_dataset(path, img_size, batch_size, sample_size):
 ################
 
 def smooth_labels(y, label_type):
-    if label_type is 'positive':
+    if label_type == 'positive':
         return y - 0.3 + (np.random.random(y.shape) * 0.5)
-    elif label_type is 'negative':
+    elif label_type == 'negative':
         return y + np.random.random(y.shape) * 0.3
     else:
         raise ValueError('Expected "positive" or "negative" for label_type. Recieved:', label_type)

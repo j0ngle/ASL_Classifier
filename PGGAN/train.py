@@ -49,8 +49,10 @@ def train_step(images, generator, discriminator, d_pretrain=5, smooth=False, noi
     gen_optimizer.apply_gradients(zip(gen_gradients, generator.trainable_variables))
     disc_optimizer.apply_gradients(zip(disc_gradients, discriminator.trainable_variables))
 
-  #With pretrianing
-  else:
+
+
+  #Pretrain D
+  elif d_pretrain > 0:
     #Pretrain D for d_pretrain steps
     for i in range(d_pretrain):
       noise = tf.random.normal(shape=[BATCH_SIZE, CODINGS_SIZE])
@@ -89,9 +91,52 @@ def train_step(images, generator, discriminator, d_pretrain=5, smooth=False, noi
       gen_gradients = gen_tape.gradient(gen_loss, generator.trainable_variables)
       gen_optimizer.apply_gradients(zip(gen_gradients, generator.trainable_variables))
 
+
+
+  #Pretrain G
+  elif d_pretrain < 0:
+    noise = tf.random.normal(shape=[BATCH_SIZE, CODINGS_SIZE])
+
+    with tf.GradientTape() as disc_tape:
+      #Generate images
+      generated_images = generator(noise, training=False)
+
+      #Send real and fake images through D
+      real_output = discriminator(images, training=True)
+      fake_output = discriminator(generated_images, training=True)
+
+      #get D loss
+      disc_loss = discriminator_loss(real_output, 
+                                      fake_output, 
+                                      apply_smoothing=smooth, 
+                                      apply_noise=False)
+      
+      #Get and apply D gradients
+      disc_gradients = disc_tape.gradient(disc_loss, discriminator.trainable_variables)
+      disc_optimizer.apply_gradients(zip(disc_gradients, discriminator.trainable_variables))
+
+    for i in range(-d_pretrain):
+      with tf.GradientTape() as gen_tape:
+        #Generate images
+        generated_images = generator(noise, training=True)
+
+        #Get D output for fake images
+        fake_output = discriminator(generated_images, training=False)
+
+        #G loss
+        gen_loss = generator_loss(fake_output,
+                                  apply_smoothing=smooth)
+        
+        #Get and apply gradients
+        gen_gradients = gen_tape.gradient(gen_loss, generator.trainable_variables)
+        gen_optimizer.apply_gradients(zip(gen_gradients, generator.trainable_variables))
+
+
   return gen_loss, disc_loss
 
 def update_alpha(a, generator, discriminator):
+  print("Updating alpha (a={})...\n".format(a))
+
   for layer in generator.layers:
     if isinstance(layer, WeightedSum):
       backend.set_value(layer.alpha, a)
@@ -116,6 +161,9 @@ def train_gan(path, generator, discriminator, epochs=50, plot_step=1, ckpt_step=
     generator, generator_stable = fade_G(generator, depth)
     discriminator, discriminator_stable = fade_D(discriminator, depth)
 
+    print(generator.summary())
+    print(generator_stable.summary())
+
     depth_loss_G = np.array([])
     depth_loss_D = np.array([])
 
@@ -132,7 +180,7 @@ def train_gan(path, generator, discriminator, epochs=50, plot_step=1, ckpt_step=
         g_loss, d_loss = train_step(batch,
                                     generator, 
                                     discriminator, 
-                                    d_pretrain=0)
+                                    d_pretrain=3)
 
         epoch_loss_G.append(g_loss)
         epoch_loss_D.append(d_loss)
@@ -169,11 +217,16 @@ def train_gan(path, generator, discriminator, epochs=50, plot_step=1, ckpt_step=
         plot_multiple_images(generated_images, epoch+1, 'epoch_grids', 8)
         # plt.show()
 
-        plot_metrics('GD_epoch_loss', "iterations", "loss", epoch,
+        plot_metrics('GD_epoch_loss_D{}'.format(depth), "iterations", "loss", epoch,
                       epoch_loss_G, "Generator", 
                       epoch_loss_D, "Discriminator")
 
-        plot_metrics('GD_total_depth_loss', "iterations", "loss", epoch,
+        plot_metrics('S_GD_epoch_loss_D{}'.format(depth), "iterations",
+                      "loss", epoch,
+                      stable_epoch_loss_G, "Generator", 
+                      stable_epoch_loss_D, "Discriminator")
+
+        plot_metrics('GD_total_depth_loss_D{}'.format(depth), "iterations", "loss", epoch,
                       depth_loss_G, "Generator", 
                       depth_loss_D, "Discriminator")
 
@@ -218,4 +271,4 @@ if __name__ == "__main__":
   generator = init_generator()
   discriminator = init_discriminator()
 
-  train_gan(PATH, generator, discriminator, epochs=50, plot_step=5)
+  train_gan(PATH, generator, discriminator, epochs=2, plot_step=1, ckpt_step=10)

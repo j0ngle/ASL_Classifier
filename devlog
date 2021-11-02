@@ -1,0 +1,33 @@
+v0.1.0
+d_pretrain=3
+
+--
+
+v0.1.1
+d_pretrain=0
+
+--
+
+v0.2.0
+Added supoprt for generator pretraining (via -d_pretrain input)
+d_pretrain=-3
+
+v0.2.1
+Note: Seems that the stablizing section of training is causing g_loss to converge to 0
+Note: I'm not sure if the model is actually merging the smaller and bigger models
+
+v0.2.2
+Set train=False for G in d_pretrain section of train_step
+Improved file names
+D_LEARNING_RATE=.0002
+G_LEARNING_RATE=.0001
+
+Don't know why by the loss for D and G quickly average out to 15
+
+v0.2.3
+Set SAMPLE_SIZE = 1000
+D_LEARNING_RATE=.0002
+G_LEARNING_RATE=.0002
+
+Same issue as before, D and G quickly average out to 15. It happed the second it swtiches
+to stable model

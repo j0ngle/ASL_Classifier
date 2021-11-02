@@ -8,7 +8,7 @@ from helpers import smooth_labels, noisy_labels
 # from train import FILTERS, LEAKY_SLOPE, CODINGS_SIZE
 # from train import scaled_size, cross_entropy
 
-SAMPLE_SIZE      = 5000
+SAMPLE_SIZE      = 1000
 BATCH_SIZE       = 32
 LEAKY_SLOPE      = 0.2
 DROPOUT          = 0.4
@@ -16,15 +16,14 @@ CODINGS_SIZE     = 128 #Might increase size later
 FILTERS          = [512, 256, 128, 64, 32, 16, 8, 4]
 WEIGHT_STD       = 0.02
 WEIGHT_MEAN      = 0
-LEARNING_RATE_G  = 0.0001
+LEARNING_RATE_G  = 0.0002
 LEARNING_RATE_D  = 0.0002
 scaled_size      = 4
 
-gen_optimizer = keras.optimizers.Adam(learning_rate=LEARNING_RATE_G, beta_1=.5)
+gen_optimizer = keras.optimizers.Adam(learning_rate=LEARNING_RATE_G, beta_1=0.5)
 disc_optimizer = keras.optimizers.Adam(learning_rate=LEARNING_RATE_D, beta_1=0.5)
 #disc_optimizer = keras.optimizers.SGD(learning_rate=LEARNING_RATE_D)
 cross_entropy = keras.losses.BinaryCrossentropy(from_logits=False)
-
 ######################
 #   CUSTOM CLASSES   #
 ######################
