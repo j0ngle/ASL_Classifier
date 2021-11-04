@@ -258,7 +258,44 @@ def train_gan(path, generator, discriminator, epochs=50, plot_step=1, ckpt_step=
   #Save model
   generator.save_weights("final_model.ckpt")
 
-    
+def train_without_growth(path, generator, discriminator, epochs=50, plot_step=1, ckpt_step=1):
+  dataset = prepare_dataset(path, FILTERS[7-depth], BATCH_SIZE, SAMPLE_SIZE)
+
+  total_loss_G = np.array([])
+  total_loss_D = np.array([])
+
+  for epoch in len(epochs):
+    epoch_loss_G = []
+    epoch_loss_D = []
+
+    for batch in dataset:
+      g_loss, d_loss = train_step(batch,
+                                  generator, 
+                                  discriminator, 
+                                  d_pretrain=3)
+
+      epoch_loss_G.append(g_loss)
+      epoch_loss_D.append(d_loss)
+
+    total_loss_G = np.append(total_loss_G, np.array([epoch_loss_G]))
+    total_loss_D = np.append(total_loss_D, np.array([epoch_loss_D]))
+
+    print_statistics(epoch_loss_G, "Generator")
+    print_statistics(epoch_loss_D, "Discriminator")
+
+    if ((epoch + 1) % plot_step == 0) or epoch == 0:
+      noise = tf.random.normal(shape=[BATCH_SIZE, CODINGS_SIZE])
+      generated_images = generator(noise, training=False)
+      plot_multiple_images(generated_images, epoch+1, 'epoch_grids', 8)
+      # plt.show()
+
+      plot_metrics('GD_epoch_loss_D{}'.format(depth), "iterations", "loss", epoch,
+                    epoch_loss_G, "Generator", 
+                    epoch_loss_D, "Discriminator")
+
+      plot_metrics('GD_total_depth_loss_D{}'.format(depth), "iterations", "loss", epoch,
+                    total_loss_G, "Generator", 
+                    total_loss_D, "Discriminator")
 
 ############
 #   MAIN   #
@@ -271,4 +308,6 @@ if __name__ == "__main__":
   generator = init_generator()
   discriminator = init_discriminator()
 
-  train_gan(PATH, generator, discriminator, epochs=2, plot_step=1, ckpt_step=10)
+  # train_gan(PATH, generator, discriminator, epochs=2, plot_step=1, ckpt_step=10)
+  train_without_growth(PATH, generator, discriminator, epochs=5, plot_step=1, ckpt_step=10)
+  
