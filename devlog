@@ -31,3 +31,6 @@ G_LEARNING_RATE=.0002
 
 Same issue as before, D and G quickly average out to 15. It happed the second it swtiches
 to stable model
+
+v0.2.4
+TODO: Look into Generator and/or discriminator not starting at the right size

@@ -259,12 +259,12 @@ def train_gan(path, generator, discriminator, epochs=50, plot_step=1, ckpt_step=
   generator.save_weights("final_model.ckpt")
 
 def train_without_growth(path, generator, discriminator, epochs=50, plot_step=1, ckpt_step=1):
-  dataset = prepare_dataset(path, FILTERS[7-depth], BATCH_SIZE, SAMPLE_SIZE)
+  dataset = prepare_dataset(path, FILTERS[7], BATCH_SIZE, SAMPLE_SIZE)
 
   total_loss_G = np.array([])
   total_loss_D = np.array([])
 
-  for epoch in len(epochs):
+  for epoch in range(epochs):
     epoch_loss_G = []
     epoch_loss_D = []
 
@@ -289,11 +289,11 @@ def train_without_growth(path, generator, discriminator, epochs=50, plot_step=1,
       plot_multiple_images(generated_images, epoch+1, 'epoch_grids', 8)
       # plt.show()
 
-      plot_metrics('GD_epoch_loss_D{}'.format(depth), "iterations", "loss", epoch,
+      plot_metrics('GD_epoch_loss', "iterations", "loss", epoch,
                     epoch_loss_G, "Generator", 
                     epoch_loss_D, "Discriminator")
 
-      plot_metrics('GD_total_depth_loss_D{}'.format(depth), "iterations", "loss", epoch,
+      plot_metrics('GD_total_loss', "iterations", "loss", epoch,
                     total_loss_G, "Generator", 
                     total_loss_D, "Discriminator")
 
