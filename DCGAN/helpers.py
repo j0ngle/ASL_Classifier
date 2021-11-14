@@ -8,7 +8,7 @@ from tensorflow import keras
 
 
 #PROCESSING HELPERS
-IMG_SIZE = 64
+
 
 def get_csv_path(filename, path=''):
   """Reads csv file specified filepath
@@ -23,18 +23,49 @@ def get_csv_path(filename, path=''):
   return pd.read_csv(csv_path)
 
 
-def process_image(img_path):
+def process_image(img_path, d_size):
   #Convert Image to numpy array
   img = cv2.imread(img_path)
 
   #Resize the image
-  img = cv2.resize(img, dsize=(IMG_SIZE, IMG_SIZE), interpolation=cv2.INTER_CUBIC)
+  img = cv2.resize(img, dsize=(d_size, d_size), interpolation=cv2.INTER_CUBIC)
 
   #Normalize image
   img = (img - 127.5) / 127.5
   # img = img / 255.
 
   return img.astype(np.float32)
+
+def process_batch(path, d_size):
+    processed = []
+    i = 0
+
+    print("[PREPROCESSING] Processing all images in {}...".format(path))
+    print("[PREPROCESSING] Scaling images to size {}x{}".format(d_size, d_size))
+
+    for filename in os.listdir(path):
+        if filename.endswith('jpg'):
+            if i == 10000:
+                break
+
+            if (i % 500 == 0):
+                print("[PREPROCESSING] Processed {} images".format(i))
+
+            img = None
+            img = process_image(path + filename, d_size)
+
+            processed.append(img)
+            i += 1
+
+    return np.asarray(processed)
+
+def prepare_dataset(path, img_size, batch_size, sample_size):
+    images = process_batch(path, img_size)
+    dataset = tf.data.Dataset.from_tensor_slices(images).shuffle(sample_size)
+    dataset = dataset.batch(batch_size, drop_remainder=True)
+    dataset.prefetch(1)
+
+    return dataset
 
 
 def smooth_labels(y, label_type):
@@ -120,6 +151,62 @@ def plot_multiple_images(images, epoch, n_cols=None):
   plt.savefig('image_at_epoch_{:04d}.png'.format(epoch))
   print("[UPDATE] Grid saved\n")
 
+def save_image(image, epoch):
+    print("Showing image")
+    #Readjusted pixel values (convert from [-1, 1] to [0, 1]) 
+    image_adjusted = (image * 127.5 + 127.5) / 255.
+    # plt.imshow(image_adjusted, cmap='binary')
+    plt.axis('off')
+    # plt.show()
+
+    print("Saving single image")
+    plt.savefig("image_at_epoch_{:04}.png".format(epoch))
+    print("Image saved\n")
+
+def save_grid(images, epoch, path, n_cols=None):
+    n_cols = n_cols or len(images)
+    n_rows = (len(images) - 1) // n_cols + 1
+    if images.shape[-1] == 1:
+        images = np.squeeze(images, axis=-1)
+    plt.figure(figsize=(n_cols, n_rows))
+    for index, image in enumerate(images):
+
+        image_adjusted = (image * 127.5 + 127.5) / 255.
+
+        plt.subplot(n_rows, n_cols, index + 1)
+        plt.imshow(image_adjusted, cmap='binary')
+        plt.axis("off")
+
+    print("\nSaving images grid")
+    #TODO: Save to folder bc right now it isn't working for some reason
+    filename = "DCGAN/" + path + "/epoch_{:04}.png".format(epoch)
+    # dir = os.path.join(filename)
+    plt.savefig(filename)
+    print("Grid saved\n")
+
+    plt.close()
+
+def print_statistics(list, title):
+    print(title+" loss mean: ", np.mean(list), 
+    "Std: ", np.std(list))
+
+def plot_metrics(title, x_label, y_label, epoch, list1, list1_label, list2=None, list2_label=None):
+    # title = title + "_at_epoch_{:04}".format(epoch)
+
+    plt.figure(figsize=(10, 3)) 
+    plt.title(title)
+    plt.plot(list1, label=list1_label)
+    plt.plot(list2, label=list2_label)
+    plt.xlabel(x_label)
+    plt.ylabel(y_label)
+    plt.legend()
+    # plt.show()
+
+    #TODO: Save to folder bc right now it isn't working for some reason
+    filename = "DCGAN/metrics/" + title + "_epoch_{:04}.png".format(epoch)
+    # dir = os.path.join("metrics/"+filename)
+    
+    plt.savefig(filename)
 
 def plot_losses(G_loss, D_loss, G_loss_total, D_loss_total, G_mean, D_mean, epoch):
   """Displays loss graphs

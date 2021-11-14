@@ -1,7 +1,7 @@
 import tensorflow as tf
 from tensorflow import keras
 
-IMG_SIZE        = 64
+IMG_SIZE        = 32
 LEAKY_SLOPE     = 0.2
 DROPOUT         = 0.4
 CODINGS_SIZE    = 128
@@ -43,8 +43,8 @@ def generator():
   model.add(keras.layers.Dense(scaled_size * scaled_size * 128, input_shape=(CODINGS_SIZE,), kernel_initializer=weight_init))
   model.add(keras.layers.Reshape([scaled_size, scaled_size, 128]))
   
-  model = conv_transpose(model, 512, k_size=5, s_size=1)
-  model.add(keras.layers.Dropout(DROPOUT))
+  # model = conv_transpose(model, 512, k_size=5, s_size=1)
+  # model.add(keras.layers.Dropout(DROPOUT))
 
   model = conv_transpose(model, 256, k_size=5, s_size=2)
   model.add(keras.layers.Dropout(DROPOUT))
@@ -70,7 +70,7 @@ def discriminator():
 
   model.add(keras.layers.Conv2D(32, kernel_size=(5, 5), strides=(1, 1), 
                               padding='same', activation=keras.layers.LeakyReLU(LEAKY_SLOPE), 
-                              input_shape=[64, 64, 3], kernel_initializer=weight_init)) 
+                              input_shape=[IMG_SIZE, IMG_SIZE, 3], kernel_initializer=weight_init)) 
 
   #model.add(keras.layers.Dropout(DROPOUT))
   model = conv(model, 64, k_size=5, s_size=2)
@@ -82,7 +82,7 @@ def discriminator():
   model = conv(model, 256, k_size=5, s_size=2)
 
   #model.add(keras.layers.Dropout(DROPOUT))
-  model = conv(model, 512, k_size=5, s_size=2)
+  # model = conv(model, 512, k_size=5, s_size=2)
 
   #model.add(keras.layers.Lambda(minibatch_discrimination))
 

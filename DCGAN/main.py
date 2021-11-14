@@ -1,12 +1,16 @@
 import numpy as np
 import cv2
 import os
+
+os.add_dll_directory("C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v11.4/bin")
+
 import urllib
 import urllib.request
 import pandas as pd
 import matplotlib.pyplot as plt
 import tensorflow as tf
 from tensorflow import keras
+from helpers import *
 import helpers
 import networks
 
@@ -92,26 +96,25 @@ def train_gan(dataset, epochs=50, plot_step=1, ckpt_step=20):
         all_gl = np.append(all_gl, np.array([G_loss]))
         all_dl = np.append(all_dl, np.array([D_loss]))
 
-        #Generate test images
-        noise = tf.random.normal(shape=[BATCH_SIZE, CODINGS_SIZE])
-        generated_images = generator(noise, training=False)
-
-        #Print and Plot
-        print("Generator Loss Mean:", np.mean(G_loss), "Std:", np.std(G_loss))
-        print("Discriminator Loss Mean:", np.mean(D_loss), "Std:", np.std(D_loss))
+        #Print
+        print_statistics(G_loss, "Generator loss")
+        print_statistics(D_loss, "Discriminator loss")
+        # print("Generator Loss Mean:", np.mean(G_loss), "Std:", np.std(G_loss))
+        # print("Discriminator Loss Mean:", np.mean(D_loss), "Std:", np.std(D_loss))
         print()
 
         G_mean = np.append(G_mean, np.mean(G_loss))
         D_mean = np.append(D_mean, np.mean(D_loss))
 
         if ((epoch + 1) % plot_step == 0) or epoch == 0:
-            plt.close()
-            plt.close()
-            plt.close()
-            helpers.plot_losses(G_loss, D_loss, all_gl, all_dl, G_mean, D_mean, epoch)
-            helpers.plot_multiple_images(generated_images, epoch+1, 8)                
-            plt.draw()       
-            plt.pause(5)       
+            #Generate test images
+            noise = tf.random.normal(shape=[BATCH_SIZE, CODINGS_SIZE])
+            generated_images = generator(noise, training=False)
+
+            plot_metrics("G-D loss", "Iterations", "Loss", epoch, G_loss, "G", D_loss, "D")
+            plot_metrics("G-D_loss_total", "Iterations", "Loss", epoch, all_gl, "G", all_dl, "D")
+
+            save_grid(generated_images, epoch+1, 'grids', 8) 
 
         if (epoch + 1) % ckpt_step == 0:
             #Save checkpoint
@@ -123,11 +126,13 @@ if __name__ == '__main__':
     SAMPLE_SIZE     = 1000
     BATCH_SIZE      = 32
     CODINGS_SIZE    = 128
+    IMG_SIZE        = 32
+    LEARNING_RATE_G = 0.0003
+    LEARNING_RATE_D = 0.0001
 
-    LEARNING_RATE_G = 0.0002
-    LEARNING_RATE_D = 0.0002
+    PATH = "D:/School/landscape/"
 
-    dataset = process()
+    dataset = prepare_dataset(PATH, IMG_SIZE, BATCH_SIZE, SAMPLE_SIZE)
 
     generator = networks.generator()
     discriminator = networks.discriminator()
