@@ -24,3 +24,9 @@ Progressive Growth Generative Adverserial Network (PGCAN) designed to learn to r
 
 Architecture based on [this](https://fabulousjeong.medium.com/tensorflow2-0-pggan-progressive-growing-of-gans-for-improved-quality-stability-and-variation-67a474b39356) tutorial. Still a work in progress. Once I get it working, I'm hoping to make some changes to it to make it mine
 
+# PGGAN (folder)
+Standard python version of PGGAN.ipynb. Improved architecture, statistic collection, etc. (WIP)
+
+# CIFAR10_classifier.ipynb
+Simple convolutional network built in Pytorch to identify and classify images from the CIFAR10 dataset
+
