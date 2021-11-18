@@ -2,3 +2,5 @@ PGGAN/depth_grids
 PGGAN/epoch_grids
 PGGAN/metrics
 training_checkpoints
+DCGAN/metrics
+DCGAN/grids
