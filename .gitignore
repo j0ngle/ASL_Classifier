@@ -2,3 +2,6 @@ PGGAN/depth_grids
 PGGAN/epoch_grids
 PGGAN/metrics
 training_checkpoints
+devlog.txt
+VOC2012*Segmentation/test.py
+VOC2012*Segmentation/__pycache__
