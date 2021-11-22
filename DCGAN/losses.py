@@ -1,5 +1,4 @@
 import tensorflow as tf
-from tensorflow.math import log, sigmoid
 from tensorflow import keras
 
 def minimax_loss_D(real_output, fake_output, apply_smoothing=True, apply_noise=True):
