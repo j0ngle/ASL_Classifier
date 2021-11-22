@@ -6,7 +6,8 @@ from d2l import torch as d2l
 import numpy as np
 import matplotlib.pyplot as plt
 
-#Preprocessing pipeline from: d2l.ai, chapter 13
+#Preprocessing pipeline (mostly) from: d2l.ai, chapter 13
+#Some changes were made to ease of reading
 
 #Label maps
 COLORMAP = [[0, 0, 0], [128, 0, 0], [0, 128, 0], [128, 128, 0],
@@ -92,8 +93,8 @@ def label_indices(cmap, cmap2label):
 class VOC_Dataset(Dataset):
     def __init__(self, is_train, crop_size, dir):
         f, l = read_images(dir, is_train=is_train)
-        self.features = f
-        self.labels = l
+        self.features = self.filter(f)
+        self.labels = self.filter(l)
         self.c2l = cmap_to_label()
         self.crop_size = crop_size
 
@@ -103,8 +104,23 @@ class VOC_Dataset(Dataset):
     def __len__(self):
         return len(self.features)
 
-    def __getitem__(self, idx):
-        #TODO: Crop images and return
+    def filter(self, imgs):
+        filtered_imgs = []
 
-        return 0
+        for img in imgs:
+            if img.shape[1] >= self.crop_size[0] and img.shape[2] >- self.crop_size[1]:
+                filtered_imgs.append(img)
+
+        return filtered_imgs
+
+    def __getitem__(self, idx):
+        img = self.features[idx]
+        label = self.labels[idx]
+
+        rect = torchvision.transforms.RandomCrop.get_params(img, (self.crop_size, self.crop_size))
+
+        img = torchvision.transforms.functional.crop(img, *rect)
+        label = torchvision.transforms.functional.crop(label, *rect)
+
+        return img, label_indices(label, self.c2l)
 
