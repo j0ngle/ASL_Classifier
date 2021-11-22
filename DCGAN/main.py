@@ -127,8 +127,8 @@ if __name__ == '__main__':
     BATCH_SIZE      = 32
     CODINGS_SIZE    = 128
     IMG_SIZE        = 32
-    LEARNING_RATE_G = 0.0003
-    LEARNING_RATE_D = 0.0001
+    LEARNING_RATE_G = 0.0002
+    LEARNING_RATE_D = 0.0002
 
     PATH = "D:/School/landscape/"
 

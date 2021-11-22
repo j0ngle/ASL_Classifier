@@ -1,2 +1,24 @@
+v0.30
 Updated metrics reports
 Fed network 32x32 images instead of 64x64
+
+v0.31
+Tweaked learning rates
+Removed 512 filter layers
+
+v0.32
+Changed G's activation function to ReLU
+
+v0.33
+Increased max filters to 1024
+Changed D layer 1 from stride=(1, 1) to stride=(2, 2)
+G_lr = D_lr = .0002
+
+Current G pipeline:
+2x2x1024 -> 4x4x512 -> 8x8x256 -> 16x16x128 -> 32x32x3
+
+Current D pipeline:
+32x32x3 -> 16x16x128 -> 8x8x256 -> 4x4x512 -> 2x2x1024
+
+v0.40
+Added Minibatch Discrimination
