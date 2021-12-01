@@ -38,8 +38,8 @@ def train_step(images, generator, discriminator, d_pretrain=5, smooth=False, noi
                                 apply_smoothing=smooth)
       disc_loss = discriminator_loss(real_output, 
                                      fake_output, 
-                                     apply_smoothing=False, 
-                                     apply_noise=False)
+                                     apply_smoothing=smooth, 
+                                     apply_noise=noise)
 
     #Get gradients
     gen_gradients = gen_tape.gradient(gen_loss, generator.trainable_variables)
