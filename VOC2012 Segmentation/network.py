@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.functional as F
 import torchvision
-from torch.utils.data import Dataset, Dataloader
+from torch.utils.data import Dataset
 import matplotlib.pyplot as plt
 
 def get_encoder(net='resnet18'):
@@ -38,6 +38,9 @@ def bilinear_kernel(in_channels, out_channels, kernel_size):
     weight[range(in_channels), range(out_channels), :, :] = filt
     return weight
 
+def init_weights(net, num_classes):
+    W = bilinear_kernel(num_classes, num_classes, 64)
+    net.transpose_conv.weight.data.copy_(W)
 
 class FCN(nn.Module):
     def __init__(self):

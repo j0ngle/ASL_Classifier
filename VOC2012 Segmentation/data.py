@@ -44,7 +44,7 @@ def read_images(voc_dir, is_train=True):
     '''
 
     txt_filename = os.path.join(voc_dir, 'ImageSets', 'Segmentation', 
-                                'train.txt' if is_train else 'val_text')
+                                'train.txt' if is_train else 'val.txt')
     mode = torchvision.io.image.ImageReadMode.RGB
 
     with open(txt_filename, 'r') as file:
@@ -93,10 +93,11 @@ def label_indices(cmap, cmap2label):
 class VOC_Dataset(Dataset):
     def __init__(self, is_train, crop_size, dir):
         f, l = read_images(dir, is_train=is_train)
+        self.crop_size = crop_size
         self.features = self.filter(f)
         self.labels = self.filter(l)
         self.c2l = cmap_to_label()
-        self.crop_size = crop_size
+        
 
         #TODO: Filter images that are smaller than crop_size
         #TODO: Normalize images
@@ -108,7 +109,7 @@ class VOC_Dataset(Dataset):
         filtered_imgs = []
 
         for img in imgs:
-            if img.shape[1] >= self.crop_size[0] and img.shape[2] >- self.crop_size[1]:
+            if img.shape[1] >= self.crop_size[0] and img.shape[2] >= self.crop_size[1]:
                 filtered_imgs.append(img)
 
         return filtered_imgs
