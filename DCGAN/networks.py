@@ -113,7 +113,7 @@ def discriminator():
   #2x2
   #model.add(keras.layers.Lambda(minibatch_discrimination))
 
-  model.add(Minibatch())
+  # model.add(Minibatch())
 
   model.add(keras.layers.Flatten())
   model.add(keras.layers.Dense(1, activation='sigmoid'))

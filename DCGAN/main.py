@@ -13,6 +13,7 @@ from tensorflow import keras
 from helpers import *
 import helpers
 import networks
+from losses import *
 
 def process():
     print("Processing images...")
@@ -62,8 +63,11 @@ def train_step(images):
     real_output = discriminator(images, training=True)
     fake_output = discriminator(generated_images, training=True)
 
-    gen_loss = helpers.generator_loss(fake_output, apply_smoothing=True)
-    disc_loss = helpers.discriminator_loss(real_output, fake_output, apply_smoothing=True, apply_noise=True)
+    # gen_loss = helpers.generator_loss(fake_output, apply_smoothing=True)
+    # disc_loss = helpers.discriminator_loss(real_output, fake_output, apply_smoothing=True, apply_noise=True)
+
+    gen_loss = minimax_loss_G(fake_output)
+    disc_loss = minimax_loss_D(real_output, fake_output)
 
   gen_gradients = gen_tape.gradient(gen_loss, generator.trainable_variables)
   disc_gradients = disc_tape.gradient(disc_loss, discriminator.trainable_variables)
