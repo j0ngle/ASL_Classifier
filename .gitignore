@@ -5,3 +5,5 @@ training_checkpoints
 devlog.txt
 VOC2012*Segmentation/test.py
 VOC2012*Segmentation/__pycache__
+PGGAN/__pycache__
+DCGAN/__pycache__
