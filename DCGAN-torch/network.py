@@ -22,7 +22,7 @@ def conv(in_channels, out_channels, k_size, stride):
         nn.LeakyReLU(LEAKY_SLOPE)
     )
 
-class generator(nn.Module):
+class Generator(nn.Module):
     def __init__(self):
         self.dense   = nn.Linear(LATENT, scaled_size*scaled_size*LATENT)
         self.dropout = nn.Dropout()
@@ -41,7 +41,7 @@ class generator(nn.Module):
         x = self.out(x)
         return self.tanh(x)
 
-class discriminator(nn.Module):
+class Discriminator(nn.Module):
     def __init__(self):
         self.conv_0  = nn.Conv2d(3, 128, stride=2, kernel_size=5)
         self.leaky   = nn.LeakyReLU(LEAKY_SLOPE)

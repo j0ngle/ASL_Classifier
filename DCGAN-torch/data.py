@@ -15,8 +15,6 @@ preprocess = T.Compose([
     )
 ])
 
-
-
 def process_images(path, d_size):
     processed = []
     i = 0
