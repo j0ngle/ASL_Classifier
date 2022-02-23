@@ -29,7 +29,7 @@ def process_images(path, d_size):
 
         i+=1
 
-    return processed
+    return processed, len(processed)
 
 class GAN_Dataset(Dataset):
     def __init__(self, d_size, path):

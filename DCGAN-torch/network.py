@@ -1,10 +1,6 @@
 import torch
 from torch import nn
-
-LEAKY_SLOPE = 0.2
-IMG_SIZE = 32
-SCALE = 16
-LATENT = 128
+from main import IMG_SIZE, LEAKY_SLOPE, LATENT
 
 scaled_size = IMG_SIZE // 16
 
@@ -50,6 +46,7 @@ class Discriminator(nn.Module):
         self.conv_3  = conv(512, 1024, k_size=5, stride=2)
         self.flatten = nn.Flatten()
         self.dense   = nn.Linear(scaled_size*scaled_size*1024, 1)
+        self.Sigmoid = nn.Sigmoid()
 
     def forward(self, x):
         x = self.conv_0(x)
@@ -58,4 +55,5 @@ class Discriminator(nn.Module):
         x = self.conv_2(x)
         x = self.conv_3(x)
         x = self.flatten(x)
-        return self.dense(x)    #sigmoid activation
+        x = self.dense(x)    #sigmoid activation
+        return self.Sigmoid(x)
