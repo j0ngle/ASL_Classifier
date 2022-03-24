@@ -1,27 +1,27 @@
 from torch.optim import Adam
-from torch.utils.data import Dataloader
+from torch.utils.data import DataLoader
 from data import GAN_Dataset
 from network import Generator, Discriminator
+from network import BATCH_SIZE
 from train_test import train
 
-###################
-# HYPERPARAMETERS #
-###################
-BATCH_SIZE = 32
-LEAKY_SLOPE = 0.2
-IMG_SIZE = 32
-SCALE = 16
-LATENT = 128
-###################
 
-path = "TEMP"
+
+path = "C:/Users/jthra/OneDrive/Documents/data/img_align_celeba"
+
+print("Loading dataset...")
 data = GAN_Dataset(d_size=32, path=path)
-dataloader = Dataloader(data, batch_size=BATCH_SIZE)
+dataloader = DataLoader(data, batch_size=BATCH_SIZE)
+print("Dataset loaded!")
+
 generator = Generator()
 discriminator = Discriminator()
-G_optim = Adam()
-D_optim = Adam()
+G_optim = Adam(generator.parameters())
+D_optim = Adam(discriminator.parameters())
+epochs = 10
 
-train(dataloader, generator, discriminator, G_optim, D_optim)
+for epoch in range(epochs):
+    print("Starting epoch {}...".format(epoch+1))
+    train(dataloader, generator, discriminator, G_optim, D_optim)
 
 

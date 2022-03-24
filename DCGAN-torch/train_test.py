@@ -1,25 +1,31 @@
 import torch
 from loss import *
-from main import BATCH_SIZE, LATENT
+from network import BATCH_SIZE, LATENT
 
-def train_step(X, generator, discriminator, gen_optim, disc_optim):
+def train_step(X, generator, discriminator, gen_optim, disc_optim, device):
     noise = torch.randn(size=[BATCH_SIZE, LATENT])
-    generated_images = generator(noise)
-    real_output = discriminator(X)
-    fake_output = discriminator(generated_images)
 
-    gen_loss = generator_minimize_loss(fake_output)
-    disc_loss = discriminator_loss(real_output, fake_output)
-
-    gen_optim.zero_grad()
+    #Update D
     disc_optim.zero_grad()
 
-    gen_loss.backward()
+    real_output = discriminator(X)
+    
+    generated_images = generator(noise)
+    fake_output = discriminator(generated_images.detatch())
+
+    disc_loss = discriminator_loss(real_output, fake_output)
     disc_loss.backward()
 
-    gen_optim.step()
     disc_optim.step()
 
+    #Update G
+    gen_optim.zero_grad()
+    gen_loss = generator_minimize_loss(fake_output)
+
+    gen_loss.backward()
+
+    gen_optim.step()
+    
     return gen_loss, disc_loss
 
 def train(dataloader, generator, discriminator, gen_optim, disc_optim):
@@ -30,11 +36,10 @@ def train(dataloader, generator, discriminator, gen_optim, disc_optim):
     generator.train()
     discriminator.train()
 
-    for epoch, X in enumerate(dataloader):
-        X.to(device)
+    for batch, X in enumerate(dataloader):
         #statistic functions
-
-        train_step(X, generator, discriminator, gen_optim, disc_optim)
+        X.to(device)
+        train_step(X, generator, discriminator, gen_optim, disc_optim, device)
 
         #Printout and saving
 
