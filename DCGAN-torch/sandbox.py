@@ -6,11 +6,14 @@ from helpers import *
 from torch import nn
 import torch
 
-latent = 128
-noise = torch.randn(size=[32, latent])
-m = nn.Linear(latent, 2*2*latent)
+epoch = 0
+epochs = 10
+batch = 0
+size = 1000
+Dl = .5
+Gl = .2
+D_x = .2
+D_G_z = (1, 5)
 
-output = m(noise)
-print(output.size())
-
-x = torch.reshape(output, [32, 2, 2, latent])
+print("[%d/%d][%d/%d]\tLoss_D: %.4f\tLoss_G: %.4f\tD(x): %.4f\tD(G(z)): %.4f, %.4f"
+                        % (epoch, epochs, batch, size, Dl, Gl, D_x, D_G_z[0], D_G_z[1]))
