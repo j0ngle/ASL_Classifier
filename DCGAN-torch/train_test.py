@@ -67,8 +67,7 @@ def train(epochs, dataloader, generator, discriminator, gen_optim, disc_optim):
             D_losses.append(Dl.item())
 
             if batch % 10 == 0:
-                out = f"[{epoch+1:d}/{epochs:d}][{batch:d}/{size:d}]\tLoss_D: {Dl.item():.4f}\tLoss_G: {Gl.item():.4f} \
-                    \tD(x): {D_x:.4f}\tD(G(z)): {D_G_z[0]:.4f}, {D_G_z[1]:.4f}"
+                out = f"[{epoch+1:d}/{epochs:d}][{batch:d}/{size:d}]\tLoss_D: {Dl.item():.4f}\tLoss_G: {Gl.item():.4f}\tD(x): {D_x:.4f}\tD(G(z)): {D_G_z[0]:.4f}, {D_G_z[1]:.4f}"
 
                 print(out)
                 logging.info(out)

@@ -55,12 +55,9 @@ def create_logfile(dir, filename):
 
     count = 0
     while os.path.exists(_path):
-        filename = prefix + '_' + count + '.log'
+        filename = prefix + '_' + str(count) + '.log'
         _path = os.path.join(dir, filename)
         count += 1
 
     logging.basicConfig(filename=_path, encoding='utf-8', level=logging.INFO)
     logging.info("START")
-
-def log(str):
-    logging.info(str)
