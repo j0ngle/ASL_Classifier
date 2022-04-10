@@ -11,3 +11,6 @@ DCGAN-torch/__pycache__/loss.cpython-39.pyc
 DCGAN-torch/__pycache__/main.cpython-39.pyc
 DCGAN-torch/__pycache__/network.cpython-39.pyc
 DCGAN-torch/__pycache__/train_test.cpython-39.pyc
+DCGAN-torch/metrics
+DCGAN-torch/logs
+DCGAN-torch/grids

@@ -1,4 +1,9 @@
+from cv2 import log
 import matplotlib.pyplot as plt
+import numpy as np
+import logging
+import os
+from network import BATCH_SIZE, LEAKY_SLOPE, IMG_SIZE, SCALE, LATENT, F_MAPS
 
 def show_image(img):
     plt.imshow(img.permute(1, 2, 0))
@@ -21,3 +26,41 @@ def save_graph(title, x_label, y_label, epoch, list1, list1_label, list2=None, l
     # dir = os.path.join("metrics/"+filename)
     
     plt.savefig(filename)
+
+def save_images(images, epoch, n_cols=None):
+  """Displays multiple images in grid format"""
+
+  n_cols = n_cols or len(images)
+  n_rows = (len(images) - 1) // n_cols + 1
+  if images.shape[-1] == 1:
+      images = np.squeeze(images, axis=-1)
+  plt.figure(figsize=(n_cols, n_rows))
+  for index, image in enumerate(images):
+
+      image_adjusted = (image * 127.5 + 127.5) / 255.
+
+      plt.subplot(n_rows, n_cols, index + 1)
+      plt.imshow(image_adjusted.permute(1, 2, 0), cmap='binary')
+      plt.axis("off")
+    
+  print("[UPDATE] Saving image grid")
+  filename = "DCGAN-torch/grids/image_epoch_{:04}.png".format(epoch)
+  plt.savefig(filename)
+  print("[UPDATE] Grid saved\n")
+
+def create_logfile(dir, filename):
+    prefix = filename
+    filename = filename + '.log'
+    _path = os.path.join(dir, filename)
+
+    count = 0
+    while os.path.exists(_path):
+        filename = prefix + '_' + count + '.log'
+        _path = os.path.join(dir, filename)
+        count += 1
+
+    logging.basicConfig(filename=_path, encoding='utf-8', level=logging.INFO)
+    logging.info("START")
+
+def log(str):
+    logging.info(str)

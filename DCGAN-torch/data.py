@@ -19,7 +19,7 @@ def process_images(path, d_size):
     to_tensor = T.ToTensor()
 
     for filename in os.listdir(path):
-        if i >= 5000:
+        if i >= 20000:
             break
 
         if filename.endswith('jpg'):
