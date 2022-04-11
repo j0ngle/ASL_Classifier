@@ -1,15 +1,15 @@
+import random
+import torch
+from torch import nn
 from torch.optim import Adam
 from torch.utils.data import DataLoader
+
 from data import GAN_Dataset
 from network import Generator, Discriminator
 from network import initialize_weights
-from network import BATCH_SIZE
+from network import BATCH_SIZE, LR, BETAS
 from train_test import train
-from torch import manual_seed, nn
-import torch
 from helpers import create_logfile
-import random
-
 
 #Seed for reproducibility
 thisSeed = 561
@@ -37,8 +37,8 @@ discriminator.apply(initialize_weights)
 
 
 criterion = nn.BCELoss()
-G_optim = Adam(generator.parameters(), lr=0.0002, betas=(0.5, 0.999))
-D_optim = Adam(discriminator.parameters(), lr=0.0002, betas=(0.5, 0.999))
+G_optim = Adam(generator.parameters(), lr=LR, betas=BETAS)
+D_optim = Adam(discriminator.parameters(), lr=LR, betas=BETAS)
 epochs = 20
 
 logdir = 'D:/School/Machine Learning Projects/Machine-Learning-Projects/DCGAN-torch/logs/'

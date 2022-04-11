@@ -6,15 +6,21 @@ from helpers import *
 from torch import nn
 import torch
 import logging
+from torchvision.models import inception_v3
 
-print("Create log")
-create_logfile('D:/School/Machine Learning Projects/Machine-Learning-Projects/DCGAN-torch/', 'test')
+inception = inception_v3(pretrained=True)
 
-log("TEST")
+class Identity(nn.Module):
+    def __init__(self):
+        super(Identity, self).__init__()
 
-log("fhjdf")
+    def forward(self, x):
+        return x
 
-log('dfhdjfkf')
-print("done")
+inception.fc = Identity()
+inception.dropout = Identity()
 
-
+print(inception)
+x = torch.randn(64, 3, 299, 299)
+output = inception(x)
+print(output.logits)

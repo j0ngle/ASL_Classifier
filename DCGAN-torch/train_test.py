@@ -1,8 +1,9 @@
+import logging
 import torch
 from loss import *
 from network import BATCH_SIZE, LATENT
 from helpers import save_graph, save_images
-import logging
+
 
 def train_step(X, generator, discriminator, gen_optim, disc_optim, device):
     noise = torch.randn(BATCH_SIZE, LATENT, 1, 1, device=device)

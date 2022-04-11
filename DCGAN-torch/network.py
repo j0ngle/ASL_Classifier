@@ -4,12 +4,14 @@ from torch import batch_norm, nn
 ###################
 # HYPERPARAMETERS #
 ###################
-BATCH_SIZE = 128
+BATCH_SIZE  = 128
 LEAKY_SLOPE = 0.2
-IMG_SIZE = 64
-SCALE = 16
-LATENT = 100 #nz
-F_MAPS = 64 #ngf/d
+IMG_SIZE    = 64
+SCALE       = 16
+LATENT      = 100 #nz
+F_MAPS      = 64 #ngf/d
+LR          = 0.0002 #0.0002
+BETAS       = (0.5, 0.999)
 ###################
 
 scaled_size = IMG_SIZE // 16

@@ -1,5 +1,5 @@
 import torch
-import torchvision
+from torchvision.models import inception_v3
 import torchvision.transforms as T
 from torch.utils.data import Dataset, DataLoader
 import os
@@ -7,6 +7,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from PIL import Image
 from network import IMG_SIZE
+
+# inception = inception_v3(weights='Inception_V3_Weights.IMAGENET1K_V1')
 
 preprocess = T.Compose([
     T.Resize(IMG_SIZE),
