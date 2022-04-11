@@ -10,16 +10,19 @@ from network import IMG_SIZE
 
 preprocess = T.Compose([
     T.Resize(IMG_SIZE),
-    T.CenterCrop(IMG_SIZE)
+    T.CenterCrop(IMG_SIZE),
+    T.ToTensor(),
+    T.Normalize((.5, .5, .5), (.5, .5, .5))
 ])
 
+#TODO: Visualize test images (I don't think they are getting normalized correctly)
 def process_images(path, d_size):
     processed = []
     i = 0
-    to_tensor = T.ToTensor()
+    # to_tensor = T.ToTensor()
 
     for filename in os.listdir(path):
-        if i >= 20000:
+        if i >= 50000:
             break
 
         if filename.endswith('jpg'):
@@ -28,8 +31,8 @@ def process_images(path, d_size):
 
         loc = os.path.join(path, filename)
         img = Image.open(loc)
-        img = to_tensor(img)
-        processed.append(preprocess(img))
+        img = preprocess(img)
+        processed.append(img)
 
         i+=1
 

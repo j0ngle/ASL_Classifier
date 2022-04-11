@@ -24,12 +24,22 @@ def initialize_weights(model):
         nn.init.normal_(model.weight.data, 1, 0.02)
         nn.init.constant_(model.bias.data, 0)
 
-def conv_transpose(in_channels, out_channels, k_size=5, stride=2, padding=0, bias=False):
-    return nn.Sequential(
+def conv_transpose(in_channels, out_channels, k_size=5, stride=2, padding=0, bias=False, bn=True):
+    if bn:
+        layers = nn.Sequential(
+        nn.ConvTranspose2d(in_channels, out_channels, stride=stride, 
+                            kernel_size=k_size, padding=padding, bias=bias),
+        nn.BatchNorm2d(out_channels),
+        nn.ReLU(inplace=True)
+    )
+    else:
+        layers = nn.Sequential(
         nn.ConvTranspose2d(in_channels, out_channels, stride=stride, 
                             kernel_size=k_size, padding=padding, bias=bias),
         nn.ReLU(inplace=True)
     )
+
+    return layers
 
 def conv(in_channels, out_channels, k_size=5, stride=2, padding=0, bias=False, bn=True):
 
