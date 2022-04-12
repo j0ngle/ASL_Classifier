@@ -1,5 +1,6 @@
 import torch
 from torch import batch_norm, nn
+from torchvision.models import inception_v3
 
 ###################
 # HYPERPARAMETERS #
@@ -16,6 +17,7 @@ BETAS       = (0.5, 0.999)
 
 scaled_size = IMG_SIZE // 16
 
+#GAN Stuff
 def initialize_weights(model):
     '''Initialize weights randomlly from a Normal distribution with mean=0, std=0.02'''
     classname = model.__class__.__name__
@@ -105,3 +107,11 @@ class Discriminator(nn.Module):
         # x = self.flatten(x) # <-4x4
         # x = self.dense(x)   #sigmoid activation
         return self.Sigmoid(x)
+
+#Inception initialization
+class Identity(nn.Module):
+    def __init__(self):
+        super(Identity, self).__init__()
+
+    def forward(self, x):
+        return x

@@ -15,7 +15,10 @@ def save_graph(title, x_label, y_label, epoch, list1, list1_label, list2=None, l
     plt.figure(figsize=(10, 3)) 
     plt.title(title)
     plt.plot(list1, label=list1_label)
-    plt.plot(list2, label=list2_label)
+
+    if list2 is not None:
+        plt.plot(list2, label=list2_label)
+        
     plt.xlabel(x_label)
     plt.ylabel(y_label)
     plt.legend()

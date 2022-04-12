@@ -1,6 +1,7 @@
 import logging
 import torch
 from loss import *
+from data import compute_embeddings, compute_fid
 from network import BATCH_SIZE, LATENT
 from helpers import save_graph, save_images
 
@@ -51,11 +52,13 @@ def train(epochs, dataloader, generator, discriminator, gen_optim, disc_optim):
     device = "cuda" if torch.cuda.is_available() else "cpu"
     print("Using {} device".format(device))
 
+    fixed_real = next(iter(dataloader))[0:64]
     fixed_noise = torch.randn(64, LATENT, 1, 1, device=device)
     size = len(dataloader)
     generator.train()
     discriminator.train()
 
+    fid_list = []
     G_losses = []
     D_losses = []
 
@@ -73,16 +76,19 @@ def train(epochs, dataloader, generator, discriminator, gen_optim, disc_optim):
                 print(out)
                 logging.info(out)
 
-                        # % (epoch+1, epochs, batch, size, Dl.item(), Gl.item(), D_x, D_G_z[0], D_G_z[1])
-                # print("[%d/%d][%d/%d]\tLoss_D: %.4f\tLoss_G: %.4f\tD(x): %.4f\tD(G(z)): %.4f, %.4f"
-                #         % (epoch+1, epochs, batch, size, Dl.item(), Gl.item(), D_x, D_G_z[0], D_G_z[1]))
-
         save_graph("G and D loss", "Iterations", "Loss", epoch, G_losses, "G", D_losses, "D")
         
         with torch.no_grad():
             test_batch = generator(fixed_noise).detach().cpu()
         save_images(test_batch, epoch, n_cols=8)
-        
+
+        print("[UPDATE] Computing FID score...")
+        real, fake = compute_embeddings(fixed_real, test_batch)
+        fid = compute_fid(real, fake)
+        fid_list.append(fid)
+        logging.info(f"[UPDATE] FID at epoch {epoch+1}/{epochs}: {fid}")
+        save_graph("FID per epoch", "Epoch", "Score", epoch, fid_list, 'fid')
+        print("[UPDATE] FID Computed")
             
 
     return

@@ -6,16 +6,32 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 from PIL import Image
+from network import Identity
 from network import IMG_SIZE
 
-# inception = inception_v3(weights='Inception_V3_Weights.IMAGENET1K_V1')
-
+inception = inception_v3(pretrained=True)
+inception.fc = Identity()
+inception.dropout = Identity()
+inception.eval()
 preprocess = T.Compose([
     T.Resize(IMG_SIZE),
     T.CenterCrop(IMG_SIZE),
     T.ToTensor(),
     T.Normalize((.5, .5, .5), (.5, .5, .5))
 ])
+fid_resize = T.Compose([T.Resize(299)])
+
+class GAN_Dataset(Dataset):
+    def __init__(self, d_size, path):
+        f, l = process_images(path, d_size)
+        self.features = f
+        self.length = l
+
+    def __len__(self):
+        return self.length
+
+    def __getitem__(self, idx):
+        return self.features[idx]
 
 #TODO: Visualize test images (I don't think they are getting normalized correctly)
 def process_images(path, d_size):
@@ -40,16 +56,34 @@ def process_images(path, d_size):
 
     return processed, len(processed)
 
+def compute_embeddings(real_images, fake_images):
+    real_images = fid_resize(real_images)
+    fake_images = fid_resize(fake_images)
 
-class GAN_Dataset(Dataset):
-    def __init__(self, d_size, path):
-        f, l = process_images(path, d_size)
-        self.features = f
-        self.length = l
+    real = inception(real_images)
+    fake = inception(fake_images)
 
-    def __len__(self):
-        return self.length
+    return real, fake
 
-    def __getitem__(self, idx):
-        return self.features[idx]
+def compute_fid(real_embeddings, fake_embeddings):
+    #Compute means and find Euclidean distance
+    mu_real = torch.mean(real_embeddings, 1)
+    mu_fake = torch.mean(fake_embeddings, 1)
+    sq_norm = torch.sum((mu_real - mu_fake) ** 2)
+
+    #Compute covariance matrices
+    C_r = torch.cov(real_embeddings)   
+    C_f = torch.cov(fake_embeddings)
+    C_mean = torch.sqrt(torch.mm(C_r, C_f))
+
+    if torch.is_complex(C_mean):
+        C_mean = torch.real(C_mean)
+
+    trace = torch.trace(C_r + C_f - 2*C_mean)
+
+    return (sq_norm + trace).item()
+
+
+
+
 
