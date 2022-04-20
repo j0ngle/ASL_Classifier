@@ -44,7 +44,7 @@ def process_images(path, d_size):
             break
 
         if filename.endswith('jpg'):
-            if (i % 500 == 0):
+            if (i % 1000 == 0):
                 print("[PREPROCESSING] Processed {} images".format(i))
 
         loc = os.path.join(path, filename)
@@ -65,6 +65,7 @@ def compute_embeddings(real_images, fake_images):
 
     return real, fake
 
+#TODO: Fix this
 def compute_fid(real_embeddings, fake_embeddings):
     #Compute means and find Euclidean distance
     mu_real = torch.mean(real_embeddings, 1)

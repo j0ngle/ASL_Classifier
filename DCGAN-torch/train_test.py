@@ -3,11 +3,12 @@ import torch
 from loss import *
 from data import compute_embeddings, compute_fid
 from network import BATCH_SIZE, LATENT
-from helpers import save_graph, save_images
+from helpers import save_graph, save_images, send_telegram_msg
 
 
 def train_step(X, generator, discriminator, gen_optim, disc_optim, device):
     noise = torch.randn(BATCH_SIZE, LATENT, 1, 1, device=device)
+    # noise = torch.randn(size=[BATCH_SIZE, LATENT], device=device)
     X = X.to(device)
 
     ######################
@@ -48,12 +49,14 @@ def train_step(X, generator, discriminator, gen_optim, disc_optim, device):
     
     return gen_loss, disc_loss, D_x, (D_G_z1, D_G_z2)
 
+#TODO: Fix memory leak - coming from compute_fid
 def train(epochs, dataloader, generator, discriminator, gen_optim, disc_optim):
     device = "cuda" if torch.cuda.is_available() else "cpu"
     print("Using {} device".format(device))
 
-    fixed_real = next(iter(dataloader))[0:64]
-    fixed_noise = torch.randn(64, LATENT, 1, 1, device=device)
+    fixed_real = next(iter(dataloader))[0:128] #This was 64
+    # fixed_noise = torch.randn(64, LATENT, 1, 1, device=device)
+    fixed_noise = torch.randn(size=[BATCH_SIZE, LATENT], device=device)
     size = len(dataloader)
     generator.train()
     discriminator.train()
@@ -82,13 +85,13 @@ def train(epochs, dataloader, generator, discriminator, gen_optim, disc_optim):
             test_batch = generator(fixed_noise).detach().cpu()
         save_images(test_batch, epoch, n_cols=8)
 
-        print("[UPDATE] Computing FID score...")
-        real, fake = compute_embeddings(fixed_real, test_batch)
-        fid = compute_fid(real, fake)
-        fid_list.append(fid)
-        logging.info(f"[UPDATE] FID at epoch {epoch+1}/{epochs}: {fid}")
-        save_graph("FID per epoch", "Epoch", "Score", epoch, fid_list, 'fid')
-        print("[UPDATE] FID Computed")
+        # print("[UPDATE] Computing FID score...")
+        # real, fake = compute_embeddings(fixed_real, test_batch)
+        # fid = compute_fid(real, fake)
+        # fid_list.append(fid)
+        # logging.info(f"[UPDATE] FID at epoch {epoch+1}/{epochs}: {fid}")
+        # save_graph("FID per epoch", "Epoch", "Score", epoch, fid_list, 'fid')
+        # print("[UPDATE] FID Computed")
             
 
     return

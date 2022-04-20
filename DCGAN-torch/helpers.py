@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import logging
 import os
+import requests
 from network import BATCH_SIZE, LEAKY_SLOPE, IMG_SIZE, SCALE, LATENT, F_MAPS
 
 def show_image(img):
@@ -29,6 +30,7 @@ def save_graph(title, x_label, y_label, epoch, list1, list1_label, list2=None, l
     # dir = os.path.join("metrics/"+filename)
     
     plt.savefig(filename)
+    plt.close()
 
 def save_images(images, epoch, n_cols=None):
   """Displays multiple images in grid format"""
@@ -48,6 +50,7 @@ def save_images(images, epoch, n_cols=None):
     
   filename = "DCGAN-torch/grids/image_epoch_{:04}.png".format(epoch+1)
   plt.savefig(filename)
+  plt.close()
   print("[UPDATE] Image grid saved\n")
 
 def create_logfile(dir, filename):
@@ -63,3 +66,8 @@ def create_logfile(dir, filename):
 
     logging.basicConfig(filename=_path, encoding='utf-8', level=logging.INFO)
     logging.info("START")
+
+def send_telegram_msg(msg, id, token):
+    url = f"https://api.telegram.org/bot{token}/sendMessage"
+    params = {"chat_id": id, "text": msg}
+    r = requests.get(url, params=params)

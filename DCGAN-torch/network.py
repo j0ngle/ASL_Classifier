@@ -66,7 +66,7 @@ class Generator(nn.Module):
     def __init__(self):
         super(Generator, self).__init__()
 
-        self.dense   = nn.Linear(LATENT, scaled_size*scaled_size*LATENT)
+        self.dense   = nn.Linear(LATENT, F_MAPS*8 * 4 * 4)
         self.dropout = nn.Dropout()
         self.convt_1 = conv_transpose(LATENT, F_MAPS*8, k_size=4, stride=1)
         self.convt_2 = conv_transpose(F_MAPS*8, F_MAPS*4, k_size=4, stride=2, padding=1)
@@ -77,7 +77,7 @@ class Generator(nn.Module):
 
     def forward(self, x):
         # x = self.dense(x)
-        # x = torch.reshape(x, [BATCH_SIZE, F_MAPS, scaled_size, scaled_size])
+        # x = torch.reshape(x, [BATCH_SIZE, F_MAPS*8, 4, 4])
 
         x = self.convt_1(x)
         x = self.convt_2(x) # <- 4x4
