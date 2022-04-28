@@ -18,6 +18,7 @@ from helpers import *
 SEND_TELEGRAM = False
 
 datapath = "C:/Users/jthra/OneDrive/Documents/data/img_align_celeba"
+# datapath = "D:/School/landscape"
 telepath = "C:/Users/jthra/OneDrive/Documents/data/telegram.json"
 logpath  = "D:/School/Machine Learning Projects/Machine-Learning-Projects/DCGAN-torch/logs/"
 
@@ -78,7 +79,7 @@ out      = ''
 for epoch in range(epochs):
     print("\n--\n")
     for batch, X in enumerate(dataloader):
-        Gl, Dl, D_x, D_G_z= train_step(X, generator, discriminator, G_optim, D_optim, device, d_pretrain=2)
+        Gl, Dl, D_x, D_G_z= train_step(X, generator, discriminator, G_optim, D_optim, device, d_pretrain=1)
 
         G_losses.append(Gl.item())
         D_losses.append(Dl.item())

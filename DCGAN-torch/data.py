@@ -34,7 +34,6 @@ class GAN_Dataset(Dataset):
     def __getitem__(self, idx):
         return self.features[idx]
 
-#TODO: Visualize test images (I don't think they are getting normalized correctly)
 def process_images(path, d_size):
     processed = []
     i = 0
@@ -51,8 +50,9 @@ def process_images(path, d_size):
         loc = os.path.join(path, filename)
         img = Image.open(loc)
         img = preprocess(img)
+        
         processed.append(img)
-
+        
         i+=1
 
     return processed, len(processed)
