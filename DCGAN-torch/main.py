@@ -15,6 +15,8 @@ from network import BATCH_SIZE, LR, BETAS, LATENT
 from train_test import train, train_step
 from helpers import *
 
+SEND_TELEGRAM = False
+
 datapath = "C:/Users/jthra/OneDrive/Documents/data/img_align_celeba"
 telepath = "C:/Users/jthra/OneDrive/Documents/data/telegram.json"
 logpath  = "D:/School/Machine Learning Projects/Machine-Learning-Projects/DCGAN-torch/logs/"
@@ -73,16 +75,15 @@ G_losses = []
 D_losses = []
 out      = ''
 
-#TODO: Fix memory leak - coming from compute_fid
 for epoch in range(epochs):
     print("\n--\n")
     for batch, X in enumerate(dataloader):
-        Gl, Dl, D_x, D_G_z= train_step(X, generator, discriminator, G_optim, D_optim, device)
+        Gl, Dl, D_x, D_G_z= train_step(X, generator, discriminator, G_optim, D_optim, device, d_pretrain=2)
 
         G_losses.append(Gl.item())
         D_losses.append(Dl.item())
 
-        if batch % 10 == 0:
+        if batch % 50 == 0:
             out = f"[{epoch+1:d}/{epochs:d}][{batch:d}/{size:d}]\tLoss_D: {Dl.item():.4f}\tLoss_G: {Gl.item():.4f}\tD(x): {D_x:.4f}\tD(G(z)): {D_G_z[0]:.4f}, {D_G_z[1]:.4f}"
 
             print(out)
@@ -94,15 +95,15 @@ for epoch in range(epochs):
         test_batch = generator(fixed_noise).detach().cpu()
     save_images(test_batch, epoch, n_cols=8)
 
-    out = f"[{epoch}/{epochs}]\nAvg loss D: {np.mean(D_losses)}\nAvg loss G{np.mean(G_losses)}"
-    send_telegram_msg(out, id, token)
-
     print("[UPDATE] Computing FID score...")
-    # real, fake = compute_embeddings(fixed_real, test_batch)
     fid = compute_fid_numpy(fixed_real, test_batch)
     fid_list.append(fid)
     logging.info(f"[UPDATE] FID at epoch {epoch+1}/{epochs}: {fid}")
     save_graph("FID per epoch", "Epoch", "Score", epoch, fid_list, 'fid')
     print(f"[UPDATE] FID Computed: {fid}")
+
+    if SEND_TELEGRAM:
+        out = f"[{epoch+1}/{epochs}]\nAvg loss D: {np.mean(D_losses)}\nAvg loss G: {np.mean(G_losses)}\nFID: {fid}"
+        send_telegram_msg(out, id, token)
 
 # train(epochs, dataloader, generator, discriminator, G_optim, D_optim)

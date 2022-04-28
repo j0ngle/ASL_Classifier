@@ -6,7 +6,7 @@ from network import BATCH_SIZE, LATENT
 from helpers import save_graph, save_images, send_telegram_msg
 
 
-def train_step(X, generator, discriminator, gen_optim, disc_optim, device):
+def train_step(X, generator, discriminator, gen_optim, disc_optim, device, d_pretrain=1):
     noise = torch.randn(BATCH_SIZE, LATENT, 1, 1, device=device)
     # noise = torch.randn(size=[BATCH_SIZE, LATENT], device=device)
     X = X.to(device)
@@ -16,24 +16,25 @@ def train_step(X, generator, discriminator, gen_optim, disc_optim, device):
     ######################
 
     #On real images
-    disc_optim.zero_grad()
+    for i in range(0, d_pretrain):
+        disc_optim.zero_grad()
 
-    real_output = discriminator(X)
+        real_output = discriminator(X)
 
-    real_loss = -1 * torch.mean(torch.log(real_output))
-    real_loss.backward()
-    D_x = real_output.mean().item()
-    
-    #On fake images
-    generated_images = generator(noise)
-    fake_output = discriminator(generated_images.detach())
+        real_loss = -1 * torch.mean(torch.log(real_output))
+        real_loss.backward()
+        D_x = real_output.mean().item()
+        
+        #On fake images
+        generated_images = generator(noise)
+        fake_output = discriminator(generated_images.detach())
 
-    fake_loss = -1 * torch.mean(torch.log(1 - fake_output))
-    fake_loss.backward()
-    D_G_z1 = fake_output.mean().item()
+        fake_loss = -1 * torch.mean(torch.log(1 - fake_output))
+        fake_loss.backward()
+        D_G_z1 = fake_output.mean().item()
 
-    disc_loss = real_loss + fake_loss
-    disc_optim.step()
+        disc_loss = real_loss + fake_loss
+        disc_optim.step()
 
     ###################
     ##Update Generator
