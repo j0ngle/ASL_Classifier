@@ -19,7 +19,7 @@ scaled_size = IMG_SIZE // 16
 
 #GAN Stuff
 def initialize_weights(model):
-    '''Initialize weights randomlly from a Normal distribution with mean=0, std=0.02'''
+    '''Initialize weights randomly from a Normal distribution with mean=0, std=0.02'''
     classname = model.__class__.__name__
 
     if classname.find('Conv') != -1:

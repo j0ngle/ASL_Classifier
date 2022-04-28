@@ -8,6 +8,7 @@ from torch.optim import Adam
 from torch.utils.data import DataLoader
 
 from data import GAN_Dataset
+from data import compute_fid_numpy
 from network import Generator, Discriminator
 from network import initialize_weights
 from network import BATCH_SIZE, LR, BETAS, LATENT
@@ -96,12 +97,12 @@ for epoch in range(epochs):
     out = f"[{epoch}/{epochs}]\nAvg loss D: {np.mean(D_losses)}\nAvg loss G{np.mean(G_losses)}"
     send_telegram_msg(out, id, token)
 
-    # print("[UPDATE] Computing FID score...")
+    print("[UPDATE] Computing FID score...")
     # real, fake = compute_embeddings(fixed_real, test_batch)
-    # fid = compute_fid(real, fake)
-    # fid_list.append(fid)
-    # logging.info(f"[UPDATE] FID at epoch {epoch+1}/{epochs}: {fid}")
-    # save_graph("FID per epoch", "Epoch", "Score", epoch, fid_list, 'fid')
-    # print("[UPDATE] FID Computed")
+    fid = compute_fid_numpy(fixed_real, test_batch)
+    fid_list.append(fid)
+    logging.info(f"[UPDATE] FID at epoch {epoch+1}/{epochs}: {fid}")
+    save_graph("FID per epoch", "Epoch", "Score", epoch, fid_list, 'fid')
+    print(f"[UPDATE] FID Computed: {fid}")
 
 # train(epochs, dataloader, generator, discriminator, G_optim, D_optim)
