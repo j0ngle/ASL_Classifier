@@ -1,4 +1,5 @@
 import torch
+import numpy as np
 
 def similarity(u, v):
     '''Returns cos(theta), where theta = angle between u and v'''
@@ -12,13 +13,13 @@ def similarity(u, v):
 def nce(u, v):
     '''Noise Constrastive Estimation'''
     loss = 0
-    for i in len(u):
+    for i in range(len(u)):
         scores = []
-        for j in len(v):
+        for j in range(len(v)):
             sim = similarity(u[i], v[j])
             scores.append(torch.exp(sim))
 
-        loss += -torch.log(scores[i] / torch.sum(scores))
+        loss += -torch.log(scores[i] / torch.stack(scores).sum())
 
     return loss
 

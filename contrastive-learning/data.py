@@ -3,20 +3,19 @@ from torch.utils.data import Dataset
 import os
 from PIL import Image
 import matplotlib.pyplot as plt
+import numpy as np
 
-IMG_SIZE = 256
+IMG_SIZE = 224
 
 preprocess = T.Compose([
     T.Resize(IMG_SIZE),
     T.CenterCrop(IMG_SIZE),
-    T.ToTensor(),
-    T.Normalize((.5, .5, .5), (.5, .5, .5))
+    T.ToTensor()
 ])
 
 rand_aug = T.Compose([
     T.RandomHorizontalFlip(p=0.5),
-    T.RandomVerticalFlip(p=0.2),
-    T.RandomApply(transforms=[T.ColorJitter(brightness=.5, hue=.8, saturation=.3)]),
+    T.RandomApply(transforms=[T.ColorJitter(brightness=.5, hue=.5, saturation=.3)]),
     T.RandomRotation(degrees=(-45, 45)),
     T.RandomInvert(p=.1)
 ])
@@ -30,25 +29,27 @@ def process_images(path, num_per_class=1000):
         for filename in os.listdir(folder):
             if i >= num_per_class: break
 
-            loc = os.path.join(folder, filename)
-            img = Image.open(loc)
-
             try:
+                loc = os.path.join(folder, filename)
+                img = Image.open(loc)
                 img = preprocess(img)
             except Exception as e:
-                #Something is wrong with image loading and
-                #I can't figure out what. I'll fix it later
+                print("Something went wrong! Skipping...")
                 continue
 
+            if img.size()[0] != 3:
+                print("Invalid image size. Skipping...")
+                continue 
+            
             processed.append(img)
-
             i += 1
 
+    np.random.shuffle(processed)
     return processed, len(processed)
     
 class Img_Dataset(Dataset):
-    def __init__(self, path):
-        f, l = process_images(path, num_per_class=2000)
+    def __init__(self, path, num_per_class=2000):
+        f, l = process_images(path, num_per_class=num_per_class)
         self.features = f
         self.length = l
 
