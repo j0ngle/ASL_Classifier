@@ -12,3 +12,4 @@ DCGAN-torch/metrics
 DCGAN-torch/logs
 DCGAN-torch/grids
 contrastive-learning/__pycache__
+ViT/__pycache__

@@ -1,5 +1,6 @@
 import torch
 from torch.utils.data import DataLoader
+from torchvision.models import resnet18
 from torch.optim import Adam
 from data import Img_Dataset
 from data import rand_aug
@@ -10,10 +11,11 @@ datapath = 'C:/Users/jthra/OneDrive/Documents/data/PetImages'
 
 print("Loading dataset...")
 data = Img_Dataset(datapath, num_per_class=10000)
-dataloader = DataLoader(data, batch_size=8)
+dataloader = DataLoader(data, batch_size=32)
 print("Dataset loaded!")
 
-encoder = torch.hub.load('NVIDIA/DeepLearningExamples:torchhub', 'nvidia_resnet50', pretrained=True)
+# encoder = torch.hub.load('NVIDIA/DeepLearningExamples:torchhub', 'nvidia_resnet50', pretrained=True)
+encoder = resnet18(pretrained=True)
 encoder.fc = Identity()
 head = Head()
 if torch.cuda.is_available():
