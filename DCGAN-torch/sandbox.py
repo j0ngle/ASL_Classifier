@@ -15,5 +15,4 @@ from data import compute_embeddings, compute_fid
 import numpy as np
 from scipy.linalg import sqrtm
 
-for i in range(0, 3):
-    print(i)
+print(torch.cuda.is_available())

@@ -14,13 +14,14 @@ inception = inception_v3(pretrained=True)
 inception.fc = Identity()
 inception.dropout = Identity()
 inception.eval()
-preprocess = T.Compose([
-    T.Resize(IMG_SIZE),
-    T.CenterCrop(IMG_SIZE),
-    T.ToTensor(),
-    T.Normalize((.5, .5, .5), (.5, .5, .5))
-])
+
 fid_resize = T.Compose([T.Resize(299)])
+preprocess = T.Compose([
+                    T.Resize(IMG_SIZE),
+                    T.CenterCrop(IMG_SIZE),
+                    T.ToTensor(),
+                    T.Normalize((.5, .5, .5), (.5, .5, .5))
+                ])
 
 class GAN_Dataset(Dataset):
     def __init__(self, d_size, path):

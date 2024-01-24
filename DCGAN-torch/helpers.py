@@ -26,7 +26,7 @@ def save_graph(title, x_label, y_label, epoch, list1, list1_label, list2=None, l
     # plt.show()
 
     #TODO: Save to folder bc right now it isn't working for some reason
-    filename = "DCGAN-torch/metrics/" + title + "_epoch_{:04}.png".format(epoch+1)
+    filename = "metrics/" + title + "_epoch_{:04}.png".format(epoch+1)
     # dir = os.path.join("metrics/"+filename)
     
     plt.savefig(filename)
@@ -48,7 +48,7 @@ def save_images(images, epoch, n_cols=None):
       plt.imshow(image_adjusted.permute(1, 2, 0), cmap='binary')
       plt.axis("off")
     
-  filename = "DCGAN-torch/grids/image_epoch_{:04}.png".format(epoch+1)
+  filename = "grids/image_epoch_{:04}.png".format(epoch+1)
   plt.savefig(filename)
   plt.close()
   print("[UPDATE] Image grid saved\n")
@@ -71,3 +71,6 @@ def send_telegram_msg(msg, id, token):
     url = f"https://api.telegram.org/bot{token}/sendMessage"
     params = {"chat_id": id, "text": msg}
     r = requests.get(url, params=params)
+
+def count_parameters(model):
+    return sum(p.numel() for p in model.parameters() if p.requires_grad)
