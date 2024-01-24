@@ -6,9 +6,10 @@ from matplotlib.widgets import Button
 model_path = 'DCGAN-torch/models/model_e50.pt'
 
 # model = Generator()
-model = torch.load(model_path)
+model = torch.load(model_path, map_location=torch.device('cpu'))
 
-device = 'cuda' if torch.cuda.is_available() else 'cpu'
+# device = 'cuda' if torch.cuda.is_available() else 'cpu'
+device = 'cpu'
 model.to(device)
 
 
