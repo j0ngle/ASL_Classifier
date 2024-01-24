@@ -3,7 +3,7 @@ import torch
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Button
 
-model_path = 'models/model_e50.pt'
+model_path = 'DCGAN-torch/models/model_e50.pt'
 
 # model = Generator()
 model = torch.load(model_path)
@@ -12,8 +12,7 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 model.to(device)
 
 
-def create_new_image(val):
-    print("here")
+def create_new_image():
     latent = 100
     fixed_noise = torch.randn(1, latent, 1, 1, device=device)
 
@@ -30,17 +29,12 @@ def create_new_image(val):
     ax2.imshow(out.permute(1, 2, 0))
     ax1.axis('off')
     ax2.axis('off')
+    fig.suptitle("Close window to generate new image!")
     plt.show()
 
-    
-
-
-# create_new_image(0)
 while (True):
-    axes = plt.axes([0.5, 0.5, 0.5, 0.5])
-    bnext = Button(axes, 'Add',color="yellow")
-    bnext.on_clicked(create_new_image)
-    plt.show()
+    create_new_image()
+    
 
 # model_path = 'models/model_e50.pt'
 
